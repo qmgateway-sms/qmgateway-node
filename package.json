@@ -56,10 +56,14 @@
     "build": "tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && node scripts/mark-cjs.mjs",
     "typecheck": "tsc -p tsconfig.esm.json --noEmit",
     "test": "npm run build && node --test",
-    "test:live": "node tests/live.mjs"
+    "test:live": "node tests/live.mjs",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "@types/node": "^22.20.7",
     "typescript": "^5.9.3"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

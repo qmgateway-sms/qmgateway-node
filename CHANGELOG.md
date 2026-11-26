@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0 (unreleased)
+## 0.1.0 (2026-11-26)
 - First version: messages (send, send to many, status, list, scheduled, cancel, reschedule), inbox, devices, one-time passwords, account, balance and statistics.
 - Written in TypeScript; ships ESM and CommonJS builds with types. No runtime dependencies. Node 20 or newer.
 - Typed results and typed errors (`AuthenticationError`, `PermissionError`, `InvalidRequestError`, `NotFoundError`, `RateLimitError`, `ServerError`, `ConnectionError`).
