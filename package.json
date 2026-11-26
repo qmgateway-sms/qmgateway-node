@@ -41,7 +41,7 @@
     }
   },
   "bin": {
-    "qmgateway": "./bin/qmgateway.mjs"
+    "qmgateway": "bin/qmgateway.mjs"
   },
   "files": [
     "dist",
