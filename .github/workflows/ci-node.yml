@@ -1,0 +1,25 @@
+# CI for the Node.js SDK. Actions are pinned to full commit hashes (the tag is in the comment); Dependabot proposes updates.
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22, 24]       # keep to releases that still receive security fixes
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with: { node-version: '${{ matrix.node }}' }
+      - run: npm ci --ignore-scripts       # never run dependency install scripts in CI
+      - run: npm audit --audit-level=high
+      - run: npm run typecheck
+      # The shared contract (webhook signatures, retries, pagination), fetched read-only.
+      - run: git clone --depth 1 https://github.com/qmgateway-sms/qmgateway-contract.git tests/contract
+      - run: npm test

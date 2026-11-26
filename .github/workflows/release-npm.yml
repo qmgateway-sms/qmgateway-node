@@ -1,0 +1,42 @@
+# Publishes the Node.js SDK to npm when a version tag is pushed, using npm TRUSTED PUBLISHING (a short-lived OIDC identity, no stored token)
+# and signed provenance.
+#
+# One-time setup, by a person with MFA:
+#   1. On npmjs.com, open the package, Settings, Trusted publisher, and add this GitHub repository and the workflow file name "release-npm.yml"
+#      and the environment "release". (npm expires a trusted-publisher setup that does not complete a first publish quickly: check the current
+#      npm documentation and publish the first version soon after configuring.)
+#   2. On GitHub, create the protected environment "release" that needs a person's approval.
+#   3. Use npm 11.5.1 or newer (the step below installs it). Check the current npm documentation for the minimum.
+# Actions are pinned to full commit hashes (the tag is in the comment); Dependabot proposes updates.
+name: Release to npm
+on:
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']      # only plain version tags, never pre-release or branch names
+permissions: {}
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: release                  # a person approves each release
+    permissions:
+      contents: read
+      id-token: write                     # lets npm verify this exact workflow (trusted publishing and provenance)
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with: { persist-credentials: false }
+      - name: Check the tag is signed and matches package.json
+        run: |
+          git fetch --tags --force
+          git verify-tag "${GITHUB_REF_NAME}" || { echo "The tag is not signed. Refusing to publish."; exit 1; }
+          test "v$(node -p "require('./package.json').version")" = "${GITHUB_REF_NAME}"
+      - name: The changelog entry for this version is dated
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          grep -q "^## $v " CHANGELOG.md || { echo "CHANGELOG.md has no entry for $v."; exit 1; }
+          if grep -q "^## $v (unreleased)" CHANGELOG.md; then echo "Replace '(unreleased)' with the release date (YYYY-MM-DD) in CHANGELOG.md."; exit 1; fi
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with: { node-version: 22, registry-url: 'https://registry.npmjs.org' }
+      - run: npm install -g npm@latest
+      - run: npm ci --ignore-scripts
+      - run: git clone --depth 1 https://github.com/qmgateway-sms/qmgateway-contract.git tests/contract
+      - run: npm test
+      - run: npm publish --provenance --access public

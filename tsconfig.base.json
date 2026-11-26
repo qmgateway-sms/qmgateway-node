@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", "lib": ["ES2023"], "types": ["node"],
+    "strict": true, "noUncheckedIndexedAccess": true, "exactOptionalPropertyTypes": true, "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true, "forceConsistentCasingInFileNames": true, "skipLibCheck": true,
+    "declaration": true, "sourceMap": false, "rootDir": "src"
+  },
+  "include": ["src"]
+}
